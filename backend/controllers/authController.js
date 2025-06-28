@@ -8,6 +8,31 @@ import User from '../models/User.js';
 
 import ResetToken from '../models/resetToken.js'
 
+export const signup = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Save new user
+    const user = new User({ email, password: hashedPassword });
+    await user.save();
+
+    return res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 // POST /api/auth/forgot
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
